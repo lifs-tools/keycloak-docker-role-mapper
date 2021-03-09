@@ -1,0 +1,25 @@
+apply plugin: 'java'
+apply plugin: 'jacoco'
+apply plugin: 'maven-publish'
+
+group = 'org.lifstools.keycloak'
+
+repositories {
+    jcenter()
+}
+
+ext {
+    keycloakVersion = '12.0.2'
+}
+
+dependencies {
+    compileOnly "org.keycloak:keycloak-core:${keycloakVersion}"    
+    
+    compileOnly "org.keycloak:keycloak-services:${keycloakVersion}"    
+    
+    compileOnly "org.keycloak:keycloak-server-spi-private:${keycloakVersion}"
+    
+    compileOnly "org.keycloak:keycloak-server-spi:${keycloakVersion}"
+
+    testImplementation     'junit:junit:4.13'
+}
