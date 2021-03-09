@@ -9,7 +9,7 @@ repositories {
 }
 
 ext {
-    keycloakVersion = '12.0.2'
+    keycloakVersion = '12.0.4'
 }
 
 dependencies {

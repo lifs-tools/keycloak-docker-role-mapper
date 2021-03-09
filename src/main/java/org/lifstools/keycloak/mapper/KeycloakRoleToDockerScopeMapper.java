@@ -5,8 +5,11 @@
  */
 package org.lifstools.keycloak.mapper;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.jboss.logging.Logger;
 import org.keycloak.models.AuthenticatedClientSessionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.ProtocolMapperModel;
@@ -25,6 +28,8 @@ import org.keycloak.representations.docker.DockerResponseToken;
  */
 public class KeycloakRoleToDockerScopeMapper extends DockerAuthV2ProtocolMapper implements DockerAuthV2AttributeMapper {
 
+    private static final Logger log = Logger.getLogger(KeycloakRoleToDockerScopeMapper.class);
+
     public static final String MAPPER_ID = "docker-v2-group-to-scope-mapper";
 
     private static final String DOCKER_PULL_ROLE = "docker-pull";
@@ -33,7 +38,7 @@ public class KeycloakRoleToDockerScopeMapper extends DockerAuthV2ProtocolMapper 
 
     private static final String REGISTRY_RESOURCE = "registry";
 
-    private static final String RESOURCE_NAME = "https://docker.lifs-tools.org";
+    private static final String REPOSITORY_RESOURCE = "repository";
 
     public KeycloakRoleToDockerScopeMapper() {
     }
@@ -63,7 +68,7 @@ public class KeycloakRoleToDockerScopeMapper extends DockerAuthV2ProtocolMapper 
         // clear any pre-existing permissions
         drt.getAccessItems().clear();
         final String requestedScope = acsm.getNote(DockerAuthV2Protocol.SCOPE_PARAM);
-
+        log.debugf("Received requested docker scope: %s", requestedScope);
         //If no scope is requested (e.g. login), return empty list of access items.
         if (requestedScope == null) {
             return drt;
@@ -71,20 +76,29 @@ public class KeycloakRoleToDockerScopeMapper extends DockerAuthV2ProtocolMapper 
 
         Set<String> userRoleNames = usm.getUser().getRoleMappingsStream()
                 .map(role -> role.getName()).collect(Collectors.toSet());
-
+        log.debugf("Assigned user roles: %s", userRoleNames);
         //Check if user's roles contain at least one of docker-pull or docker-push, deny access otherwise (empty resources)
         if (!userRoleNames.contains(DOCKER_PULL_ROLE) && !userRoleNames.contains(DOCKER_PUSH_ROLE)) {
+            log.warn("userRoleNames did contain neither " + DOCKER_PULL_ROLE + " nor " + DOCKER_PUSH_ROLE);
             return drt;
         }
 
         // grant access based on user's assigned roles
         final DockerAccess requestedAccess = new DockerAccess(requestedScope);
-        if (userRoleNames.contains(DOCKER_PULL_ROLE)) {
-            drt.getAccessItems().add(requestedAccess);
+        if (REGISTRY_RESOURCE.equals(requestedAccess.getName()) || REPOSITORY_RESOURCE.equals(requestedAccess.getName())) {
+            log.debugf("Processing resource: %s", requestedAccess.getName());
+            List<String> allowedActions = new LinkedList<>();
+            if (userRoleNames.contains(DOCKER_PULL_ROLE)) {
+                log.debug("Granting pull access");
+                allowedActions.add("pull");
+            }
+            if (userRoleNames.contains(DOCKER_PUSH_ROLE)) {
+                log.debug("Granting push access");
+                allowedActions.add("push");
+            }
+            requestedAccess.setActions(allowedActions);
         }
-        if (userRoleNames.contains(DOCKER_PUSH_ROLE)) {
-            drt.getAccessItems().add(requestedAccess);
-        }
+        drt.getAccessItems().add(requestedAccess);
         return drt;
     }
 
