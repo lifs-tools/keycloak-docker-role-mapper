@@ -1,7 +1,17 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright 2021 Nils Hoffmann.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package org.lifstools.keycloak.mapper;
 
@@ -69,7 +79,7 @@ public class KeycloakRoleToDockerScopeMapper extends DockerAuthV2ProtocolMapper 
         drt.getAccessItems().clear();
         final String requestedScope = acsm.getNote(DockerAuthV2Protocol.SCOPE_PARAM);
         log.debugf("Received requested docker scope: %s", requestedScope);
-        //If no scope is requested (e.g. login), return empty list of access items.
+        // if no scope is requested (e.g. login), return empty list of access items.
         if (requestedScope == null) {
             return drt;
         }
@@ -77,9 +87,9 @@ public class KeycloakRoleToDockerScopeMapper extends DockerAuthV2ProtocolMapper 
         Set<String> userRoleNames = usm.getUser().getRoleMappingsStream()
                 .map(role -> role.getName()).collect(Collectors.toSet());
         log.debugf("Assigned user roles: %s", userRoleNames);
-        //Check if user's roles contain at least one of docker-pull or docker-push, deny access otherwise (empty resources)
+        // check if user's roles contain at least one of docker-pull or docker-push, deny access otherwise (empty resources)
         if (!userRoleNames.contains(DOCKER_PULL_ROLE) && !userRoleNames.contains(DOCKER_PUSH_ROLE)) {
-            log.warn("userRoleNames did contain neither " + DOCKER_PULL_ROLE + " nor " + DOCKER_PUSH_ROLE);
+            log.warn("userRoleNames contained neither " + DOCKER_PULL_ROLE + " nor " + DOCKER_PUSH_ROLE);
             return drt;
         }
 
