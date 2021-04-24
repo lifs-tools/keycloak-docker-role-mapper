@@ -50,6 +50,21 @@ stop-embedded-server
 
 **NOTE** For docker login to succeed, at least one of 'docker-pull' or 'docker-push' must be assigned.
 
+## Configuring the Docker Registry
+
+While you are logged into Keycloak, you can download an archive with a docker compose file and matching
+`registry.yml` set up to work with your Keycloak instance.
+
+1. Go to 'Clients' and select 'docker-registry'
+2. Go to the 'Installation' tab
+3. Select 'Docker Compose YAML' as the 'Format Option'
+4. Click on 'Download' to save the archive
+5. Unzip the archive
+6. The archive contains a 'certs' folder, which contains the certifcates that the registry needs for token verification
+7. The archive also contains a 'docker-compose.yaml' file and a 'README.md'
+8. Depending on your deployment environment, you may need to customize your registry configuration and compose file
+9. Please consult the Docker documentation for further customization details: https://docs.docker.com/registry/configuration/
+
 ## License
 
 The source code is licensed under the terms of the Apache license (see LICENSE file) v2.0.
