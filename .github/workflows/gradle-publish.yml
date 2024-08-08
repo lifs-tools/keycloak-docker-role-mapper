@@ -30,14 +30,14 @@ jobs:
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
     - name: Build with Gradle
-      uses: gradle/gradle-build-action@a4cf152f482c7ca97ef56ead29bf08bcd953284c
+      uses: gradle/gradle-build-action@093dfe9d598ec5a42246855d09b49dc76803c005
       with:
         arguments: build
 
     # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
     # the publishing section of your build.gradle
     - name: Publish to GitHub Packages
-      uses: gradle/gradle-build-action@a4cf152f482c7ca97ef56ead29bf08bcd953284c
+      uses: gradle/gradle-build-action@093dfe9d598ec5a42246855d09b49dc76803c005
       with:
         arguments: publish
       env:
